@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard CanSAT</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #0d1b2a;
+            color: #ffffff;
+        }
+
+        .dashboard {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #142850, #27496d);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 40px; /* Aumentado o espaçamento */
+            color: #00a8cc;
+        }
+
+        .parameters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .parameter {
+            background-color: #1b2b40;
+            border-radius: 8px;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .parameter span {
+            font-size: 14px;
+        }
+
+        input {
+            width: 80px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #00a8cc;
+            background-color: #142850;
+            color: white;
+            text-align: center;
+        }
+
+        .graph-container {
+            background-color: #1b2b40;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+            height: 400px;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #00a8cc;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #007399;
+            transform: scale(1.05);
+        }
+
+        .toggle-container {
+            text-align: center;
+            margin-bottom: 40px; /* Aumentado o espaçamento */
+        }
+
+        /* Estilo do botão deslizante */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+        }
+
+        input:checked + .slider {
+            background-color: #00a8cc;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard" id="screen1">
+        <div class="title">DASHBOARD - CanSAT</div>
+        
+        <div class="toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="parachuteToggle">
+                <span class="slider"></span>
+            </label>
+            <label for="parachuteToggle" style="color: white;">Com paraquedas</label>
+        </div>
+
+        <div class="parameters">
+            <div class="parameter">
+                <span>Altura inicial (m)</span>
+                <input type="number" value="0.35" readonly>
+            </div>
+            <div class="parameter">
+                <span>Ângulo (graus)</span>
+                <input type="number" value="60" readonly>
+            </div>
+            <div class="parameter">
+                <span>Pressão inicial (Pa)</span>
+                <input type="number" value="303975" readonly>
+            </div>
+            <div class="parameter">
+                <span>Massa do CanSAT (kg)</span>
+                <input type="number" value="0.2" readonly>
+            </div>
+            <div class="parameter">
+                <span>Volume de água (m³)</span>
+                <input type="number" value="0.0008" readonly>
+            </div>
+            <div class="parameter">
+                <span>Velocidade vertical inicial (m/s)</span>
+                <input type="number" value="7.07" readonly>
+            </div>
+            <div class="parameter">
+                <span>Velocidade horizontal inicial (m/s)</span>
+                <input type="number" value="7.07" readonly>
+            </div>
+            <div class="parameter">
+                <span>Coeficiente de resistência</span>
+                <input type="number" value="0.04" readonly>
+            </div>
+            <div class="parameter parachute-param" style="display: none">
+                <span>Área do paraquedas (m²)</span>
+                <input type="number" value="0.63317" readonly>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <div id="graph1" style="width: 100%; height: 100%;"></div>
+        </div>
+
+        <div class="results">
+            <div class="parameter">
+                <span>Altura máxima simulada (m)</span>
+                <input type="number" value="35" readonly>
+            </div>
+            <div class="parameter">
+                <span>Altura máxima real (m)</span>
+                <input type="number" id="realHeight" value="4.26" readonly>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button onclick="previousScreen()">←</button>
+            <button onclick="nextScreen()">→</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScreen = 1;
+        const parachuteToggle = document.getElementById('parachuteToggle');
+        const parachuteParams = document.querySelectorAll('.parachute-param');
+        const realHeightInput = document.getElementById('realHeight');
+
+        parachuteToggle.addEventListener('change', function() {
+            parachuteParams.forEach(param => {
+                param.style.display = this.checked ? 'flex' : 'none';
+            });
+            realHeightInput.value = this.checked ? '10.46' : '4.26';
+            updateGraphs();
+        });
+
+        function updateGraphs() {
+            const trace1 = {
+                x: [0, 1, 2, 3, 4, 5, 6, 7],
+                y: [0, 5, 15, 20, 15, 10, 5, 0],
+                name: 'Simulação',
+                line: { color: '#00a8cc' }
+            };
+
+            const trace2 = {
+                x: [0, 1, 2, 3, 4, 5, 6, 7],
+                y: [0, 2, 8, 12, 15, 12, 8, 2],
+                name: 'Real',
+                line: { color: '#f44336' }
+            };
+
+            const layout = {
+                title: currentScreen === 1 ? 'Deslocamento vertical no tempo' : 'Lançamento do CanSat',
+                plot_bgcolor: "#0d1b2a",
+                paper_bgcolor: "#0d1b2a",
+                font: { color: "#fff" },
+                xaxis: { title: 'Tempo (s)' },
+                yaxis: { title: 'Altura (m)' }
+            };
+
+            Plotly.newPlot('graph1', [trace1, trace2], layout);
+        }
+
+        function previousScreen() {
+            if (currentScreen > 1) {
+                currentScreen--;
+                updateGraphs();
+            }
+        }
+
+        function nextScreen() {
+            if (currentScreen < 2) {
+                currentScreen++;
+                updateGraphs();
+            }
+        }
+
+        updateGraphs();
+    </script>
+</body>
+</html>
